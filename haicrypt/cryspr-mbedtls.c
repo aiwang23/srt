@@ -213,9 +213,27 @@ int crysprMbedtls_KmPbkdf2(
         return ret;
     }
 
-    ret = mbedtls_pkcs5_pbkdf2_hmac(&mdctx,
-            (unsigned char*)passwd, passwd_len, salt, salt_len,
-            itr, (uint32_t)key_len, out);
+#if defined(MBEDTLS_VERSION_MAJOR) && (MBEDTLS_VERSION_MAJOR >= 3)
+    ret = mbedtls_pkcs5_pbkdf2_hmac_ext(
+        MBEDTLS_MD_SHA1,
+        (unsigned char*)passwd,
+        passwd_len,
+        salt,
+        salt_len,
+        itr,
+        (uint32_t)key_len,
+        out);
+#else
+    ret = mbedtls_pkcs5_pbkdf2_hmac(
+        &mdctx,
+        (unsigned char*)passwd,
+        passwd_len,
+        salt,
+        salt_len,
+        itr,
+        (uint32_t)key_len,
+        out);
+#endif
 
     mbedtls_md_free(&mdctx);
 

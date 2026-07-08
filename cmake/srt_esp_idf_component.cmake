@@ -23,6 +23,17 @@ configure_file(
 set(SRT_SRCS
     "${SRT_ESP_IDF_PORT_DIR}/nanosleep.c"
 
+    "${HAICRYPT_DIR}/cryspr.c"
+    "${HAICRYPT_DIR}/cryspr-mbedtls.c"
+    "${HAICRYPT_DIR}/hcrypt.c"
+    "${HAICRYPT_DIR}/hcrypt_ctx_rx.c"
+    "${HAICRYPT_DIR}/hcrypt_ctx_tx.c"
+    "${HAICRYPT_DIR}/hcrypt_rx.c"
+    "${HAICRYPT_DIR}/hcrypt_sa.c"
+    "${HAICRYPT_DIR}/hcrypt_tx.c"
+    "${HAICRYPT_DIR}/hcrypt_xpt_srt.c"
+    "${HAICRYPT_DIR}/haicrypt_log.cpp"
+
     "${SRTCORE_DIR}/api.cpp"
     "${SRTCORE_DIR}/buffer_snd.cpp"
     "${SRTCORE_DIR}/buffer_rcv.cpp"
@@ -61,12 +72,12 @@ idf_component_register(
     "${SRTCORE_DIR}"
     "${HAICRYPT_DIR}"
     "${CMAKE_CURRENT_BINARY_DIR}"
-    REQUIRES lwip pthread esp_rom freertos
+    REQUIRES lwip pthread esp_rom freertos mbedtls
 )
 
 target_compile_definitions(${COMPONENT_LIB} PRIVATE
     NDEBUG=1
-    SRT_VERSION=\"${SRT_VERSION}\"
+    SRT_VERSION="${SRT_VERSION}"
 
     POSIX=1
     UNIX=1
@@ -78,6 +89,9 @@ target_compile_definitions(${COMPONENT_LIB} PRIVATE
     SRT_ENABLE_APP_READER=1
     SRT_ENABLE_CLOSE_SYNCH=1
     HAVE_INET_PTON=1
+
+    SRT_ENABLE_ENCRYPTION=1
+    USE_MBEDTLS=1
 )
 
 target_compile_options(${COMPONENT_LIB} PRIVATE
