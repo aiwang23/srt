@@ -10,6 +10,11 @@
 cmake_minimum_required (VERSION 3.5 FATAL_ERROR)
 set (SRT_VERSION 1.5.5)
 
+if(ESP_PLATFORM)
+        include("${CMAKE_CURRENT_LIST_DIR}/cmake/srt_esp_idf_component.cmake")
+        return()
+endif()
+
 set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 include(CheckSymbolExists)
 include(haiUtil) # needed for set_version_variables

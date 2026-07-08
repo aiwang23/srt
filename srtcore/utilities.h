@@ -181,6 +181,28 @@ written by
    #define htole64(x) (x)
    # endif
 
+#elif defined(ESP_PLATFORM)
+
+# define __LITTLE_ENDIAN 1234
+# define __BIG_ENDIAN 4321
+# define __PDP_ENDIAN 3412
+# define __BYTE_ORDER __LITTLE_ENDIAN
+
+# define htobe16(x) __builtin_bswap16((uint16_t)(x))
+# define htole16(x) ((uint16_t)(x))
+# define be16toh(x) __builtin_bswap16((uint16_t)(x))
+# define le16toh(x) ((uint16_t)(x))
+
+# define htobe32(x) __builtin_bswap32((uint32_t)(x))
+# define htole32(x) ((uint32_t)(x))
+# define be32toh(x) __builtin_bswap32((uint32_t)(x))
+# define le32toh(x) ((uint32_t)(x))
+
+# define htobe64(x) __builtin_bswap64((uint64_t)(x))
+# define htole64(x) ((uint64_t)(x))
+# define be64toh(x) __builtin_bswap64((uint64_t)(x))
+# define le64toh(x) ((uint64_t)(x))
+
 #elif defined(__WINDOWS__)
 
 #	include <winsock2.h>

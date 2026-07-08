@@ -6000,7 +6000,7 @@ void srt::CUDT::acceptAndRespond(const sockaddr_any& agent, const sockaddr_any& 
     m_tsRcvPeerStartTime = steady_clock::time_point(); // will be set correctly at SRT HS
 
     // Uses the smaller MSS between the peers
-    m_config.iMSS = std::min(m_config.iMSS, w_hs.m_iMSS);
+    m_config.iMSS = std::min(m_config.iMSS, static_cast<int>(w_hs.m_iMSS));
 
     const size_t full_hdr_size = CPacket::UDP_HDR_SIZE + CPacket::HDR_SIZE;
     m_iMaxSRTPayloadSize = m_config.iMSS - full_hdr_size;
