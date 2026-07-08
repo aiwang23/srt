@@ -1,6 +1,6 @@
 # Secure Reliable Transport (SRT) Protocol
 
-[About SRT](#what-is-srt) | [Features](#features) | [Getting Started](#getting-started-with-srt) | [Build Instructions](#build-instructions) | [Sample Apps and Tools](#sample-applications-and-tools) | [Contribute](#contributing) | [License](#license) | [Releases](#release-history)
+[About SRT](#what-is-srt) | [Features](#features) | [Getting Started](#getting-started-with-srt) | [Build Instructions](#build-instructions) | [Sample Apps and Tools](#sample-applications-and-tools) | [ESP-IDF Port](docs/esp-idf-port-plan.md) | [Contribute](#contributing) | [License](#license) | [Releases](#release-history)
 
 <p align="left">
   <a href="http://srtalliance.org/">
@@ -163,6 +163,11 @@ In live streaming configurations, the SRT protocol maintains a constant end-to-e
 ## Build Instructions
 
 [Linux (Ubuntu/CentOS)](./docs/build/build-linux.md) | [Windows](./docs/build/build-win.md) | [macOS](./docs/build/build-macOS.md) | [iOS](./docs/build/build-iOS.md) | [Android](./docs/build/build-android.md) | [Package Managers](./docs/build/package-managers.md)
+
+### ESP-IDF Port
+
+An experimental ESP-IDF component port is available. See [ESP-IDF Port](docs/esp-idf-port-plan.md) for the current status, example layout, and validation plan.
+
 
 ### Requirements
 
