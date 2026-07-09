@@ -1,19 +1,108 @@
-# ESP-IDF Port Plan
+# ESP-IDF Build and Port Plan
 
-This document tracks the ESP-IDF port status, example layout, and validation plan for SRT on ESP32-class targets.
+This document describes the experimental ESP-IDF component build for SRT and tracks the planned validation work for ESP32-class targets.
 
 ## Status
 
-| Area                                                   | Status              |
-| ------------------------------------------------------ | ------------------- |
-| ESP-IDF component build                                | Passed              |
-| ESP32-P4 startup test                                  | Passed              |
-| `srt_startup()` / `srt_getversion()` / `srt_cleanup()` | Passed              |
-| SRT socket connection                                  | Not fully validated |
-| Data transmission                                      | Not fully validated |
-| Encryption runtime test                                | Not validated       |
+| Area                                                   | Status               |
+| ------------------------------------------------------ | -------------------- |
+| ESP-IDF component build                                | Passed               |
+| ESP32-P4 startup test                                  | Passed               |
+| `srt_startup()` / `srt_getversion()` / `srt_cleanup()` | Passed               |
+| SRT socket connection                                  | Not fully validated  |
+| Data transmission                                      | Not fully validated  |
+| Encryption build with ESP-IDF mbedTLS                  | Compile probe passed |
+| Encryption runtime test                                | Not validated        |
 
-## Directory Layout
+## Tested Environment
+
+| Item          | Value                              |
+| ------------- | ---------------------------------- |
+| ESP-IDF       | v5.5.4                             |
+| Target        | ESP32-P4                           |
+| SRT           | 1.5.5                              |
+| Build mode    | ESP-IDF component                  |
+| Basic example | `examples/esp-idf/minimal_startup` |
+
+## Build Requirements
+
+Enable C++ exceptions in ESP-IDF:
+
+```text
+CONFIG_COMPILER_CXX_EXCEPTIONS=y
+CONFIG_COMPILER_CXX_EXCEPTIONS_EMG_POOL_SIZE=0
+```
+
+For ESP32-P4 early revisions, set the chip revision correctly. Example for ESP32-P4 v1.x:
+
+```text
+CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y
+CONFIG_ESP32P4_REV_MIN_100=y
+CONFIG_ESP32P4_REV_MIN_FULL=100
+CONFIG_ESP32P4_REV_MAX_FULL=199
+```
+
+## Build Minimal Startup Example
+
+```bash
+cd examples/esp-idf/minimal_startup
+idf.py set-target esp32p4
+idf.py build
+```
+
+## Flash and Monitor
+
+```bash
+idf.py flash monitor
+```
+
+Expected output:
+
+```text
+SRT minimal startup example
+srt_startup() = 0
+srt_getversion() = 0x00010505
+srt_cleanup() done
+```
+
+## Use as an ESP-IDF Component
+
+The SRT repository can be used directly as an ESP-IDF component.
+
+Example project layout:
+
+```text
+my_project/
+├── main/
+└── components/
+    └── srt/
+        ├── CMakeLists.txt
+        ├── srtcore/
+        ├── haicrypt/
+        ├── cmake/
+        └── port/esp-idf/
+```
+
+The ESP-IDF build path is selected by `ESP_PLATFORM` in the top-level `CMakeLists.txt`. Normal Linux, Windows, and macOS CMake builds should continue to use the original SRT build system.
+
+## Current Limitations
+
+| Area                           | Status                 |
+| ------------------------------ | ---------------------- |
+| Basic lifecycle                | Passed                 |
+| UDP socket path                | Partially investigated |
+| SRT caller/listener connection | Not fully validated    |
+| Text send/receive              | Not validated          |
+| Binary send/receive            | Not validated          |
+| SRT stats                      | Not validated          |
+| Nonblocking mode               | Not validated          |
+| SRT epoll                      | Not validated          |
+| Runtime encryption             | Not validated          |
+| Long-running stability         | Not validated          |
+
+## Example Layout Plan
+
+Examples are intended for users. They should be simple, practical, and easy to run.
 
 ```text
 examples/esp-idf/
@@ -27,7 +116,26 @@ examples/esp-idf/
 ├── caller_file
 ├── listener_file
 └── encrypted_text
+```
 
+| Example           | Purpose                                        | PC-side tool                |
+| ----------------- | ---------------------------------------------- | --------------------------- |
+| `minimal_startup` | Verify startup, version query, and cleanup     | Not required                |
+| `caller_text`     | ESP32 connects to a PC listener and sends text | `srt-live-transmit`         |
+| `listener_text`   | ESP32 listens and receives text from PC        | `srt-live-transmit`         |
+| `caller_binary`   | ESP32 sends binary data to PC                  | SRT tool or custom receiver |
+| `listener_binary` | ESP32 receives binary data from PC             | SRT tool or custom sender   |
+| `caller_live`     | ESP32 sends data in live mode                  | SRT tool or FFmpeg          |
+| `listener_live`   | ESP32 receives data in live mode               | SRT tool or FFmpeg          |
+| `caller_file`     | ESP32 sends data in file mode                  | `srt-file-transmit`         |
+| `listener_file`   | ESP32 receives data in file mode               | `srt-file-transmit`         |
+| `encrypted_text`  | Verify encrypted text transmission             | SRT tool with passphrase    |
+
+## Validation Test Plan
+
+Tests are intended for port validation. They should cover the main SRT APIs and runtime behavior on ESP-IDF.
+
+```text
 tests/esp-idf/
 ├── platform/
 ├── lifecycle/
@@ -42,27 +150,6 @@ tests/esp-idf/
 ├── stability/
 └── media_mock/
 ```
-
-## Examples
-
-These examples are intended for users. They should be simple, practical, and easy to run.
-
-| Example           | Purpose                                        | PC-side tool                |
-| ----------------- | ---------------------------------------------- | --------------------------- |
-| `minimal_startup` | Verify SRT startup, version query, and cleanup | Not required                |
-| `caller_text`     | ESP32 connects to a PC listener and sends text | `srt-live-transmit`         |
-| `listener_text`   | ESP32 listens and receives text from PC        | `srt-live-transmit`         |
-| `caller_binary`   | ESP32 sends binary data to PC                  | SRT tool or custom receiver |
-| `listener_binary` | ESP32 receives binary data from PC             | SRT tool or custom sender   |
-| `caller_live`     | ESP32 sends data in live mode                  | SRT tool or FFmpeg          |
-| `listener_live`   | ESP32 receives data in live mode               | SRT tool or FFmpeg          |
-| `caller_file`     | ESP32 sends data in file mode                  | `srt-file-transmit`         |
-| `listener_file`   | ESP32 receives data in file mode               | `srt-file-transmit`         |
-| `encrypted_text`  | Verify encrypted text transmission             | SRT tool with passphrase    |
-
-## Validation Tests
-
-These tests are intended for port validation. They should cover the main SRT APIs and runtime behavior on ESP-IDF.
 
 | Category    | Test                             | Purpose                                        |
 | ----------- | -------------------------------- | ---------------------------------------------- |
@@ -105,7 +192,7 @@ These tests are intended for port validation. They should cover the main SRT API
 | Media Mock  | `media_mock/h264_sender`         | Send simulated H.264 Annex-B data              |
 | Media Mock  | `media_mock/h264_receiver`       | Receive simulated H.264 Annex-B data           |
 
-## Suggested Order
+## Suggested Validation Order
 
 | Stage | Scope                            |
 | ----- | -------------------------------- |
